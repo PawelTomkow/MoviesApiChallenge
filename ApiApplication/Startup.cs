@@ -1,3 +1,4 @@
+using ApiApplication.Configurations;
 using ApiApplication.Database;
 using ApiApplication.Database.Repositories;
 using ApiApplication.Database.Repositories.Abstractions;
@@ -23,6 +24,10 @@ namespace ApiApplication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ApiClientConfiguration>(Configuration.GetSection(ApiClientConfiguration.ApiClient));
+
+            services.AddAutoMapper(typeof(Startup));
+            
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
             services.AddTransient<ITicketsRepository, TicketsRepository>();
             services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
@@ -36,6 +41,7 @@ namespace ApiApplication
             services.AddControllers();
 
             services.AddHttpClient();
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +50,8 @@ namespace ApiApplication
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
