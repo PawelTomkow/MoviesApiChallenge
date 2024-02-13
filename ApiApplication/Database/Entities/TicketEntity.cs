@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using ApiApplication.Core.Services;
+using ApiApplication.Services;
 
 namespace ApiApplication.Database.Entities
 {
     public class TicketEntity
     {
-        public TicketEntity()
+        public TicketEntity() : this(new DateTimeProvider())
+        { }
+
+        public TicketEntity(IDateTimeProvider dateTimeProvider)
         {
-            CreatedTime = DateTime.Now;
+            CreatedTime = dateTimeProvider.DateTimeNow;
             Paid = false;
         }
 

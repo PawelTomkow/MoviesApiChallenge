@@ -1,4 +1,4 @@
-﻿namespace ApiApplication.Services
+﻿namespace ApiApplication.Core.Services
 {
     public interface IShowService
     {

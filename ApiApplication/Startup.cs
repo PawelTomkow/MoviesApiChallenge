@@ -1,7 +1,10 @@
 using ApiApplication.Configurations;
+using ApiApplication.Core.Services;
 using ApiApplication.Database;
 using ApiApplication.Database.Repositories;
 using ApiApplication.Database.Repositories.Abstractions;
+using ApiApplication.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +30,9 @@ namespace ApiApplication
             services.Configure<ApiClientConfiguration>(Configuration.GetSection(ApiClientConfiguration.ApiClient));
 
             services.AddAutoMapper(typeof(Startup));
-            
+            services.AddValidatorsFromAssemblyContaining(typeof(Startup));
+
+            services.AddScoped<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
             services.AddTransient<ITicketsRepository, TicketsRepository>();
             services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
@@ -65,7 +70,11 @@ namespace ApiApplication
                 endpoints.MapControllers();
             });
 
-            SampleData.Initialize(app);
+            if (!Configuration.GetValue<bool>("IsTest"))
+            {
+                SampleData.Initialize(app);
+
+            }
         }      
     }
 }

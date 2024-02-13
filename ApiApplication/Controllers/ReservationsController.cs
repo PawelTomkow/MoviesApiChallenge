@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
+using ApiApplication.Controllers.Contracts;
 using ApiApplication.Controllers.Contracts.Reservations;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiApplication.Controllers
@@ -9,13 +12,15 @@ namespace ApiApplication.Controllers
     [Route("api/reservations")]
     public class ReservationsController : ControllerBase
     {
-        public ReservationsController()
+        private readonly IValidator<CreateReservationRequest> _validator;
+
+        public ReservationsController(IValidator<CreateReservationRequest> validator)
         {
-            
+            _validator = validator;
         }
         
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetReservationAsync([FromQuery] string id)
+        public async Task<IActionResult> GetReservationByIdAsync([FromQuery] string id)
         {
             throw new NotImplementedException();
         }
@@ -23,6 +28,17 @@ namespace ApiApplication.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateReservationAsync([FromBody] CreateReservationRequest reservationRequest)
         {
+            var validationResult = await _validator.ValidateAsync(reservationRequest);
+            if (!validationResult.IsValid)
+            {
+                // TODO: Unpack validationResult.Errors to error object response
+                return BadRequest(new ErrorResponse()
+                {
+                    StatusCode = (int)HttpStatusCode.BadRequest,
+                    ErrorMessage = "Invalid request."
+                });
+            }
+            
             throw new NotImplementedException();
         }
     }
