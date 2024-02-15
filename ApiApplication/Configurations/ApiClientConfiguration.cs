@@ -2,7 +2,7 @@
 {
     public class ApiClientConfiguration
     {
-        public const string ApiClient = "ApiClient";
+        public const string Name = "ApiClient";
         
         public string BaseAddress { get; set; }
         public string ApiKey { get; set; }
