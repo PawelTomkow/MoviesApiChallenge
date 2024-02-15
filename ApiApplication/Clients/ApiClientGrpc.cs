@@ -1,9 +1,13 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using ApiApplication.Clients.Contracts;
 using ApiApplication.Configurations;
+using ApiApplication.Core.Exceptions;
 using AutoMapper;
+using Grpc.Core;
 using Grpc.Net.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ProtoDefinitions;
 
@@ -12,45 +16,91 @@ namespace ApiApplication.Clients
     public class ApiClientGrpc : IApiClient
     {
         private readonly IMapper _mapper;
-        private readonly ApiClientConfiguration _apiClientOptions;
+        private readonly MoviesApi.MoviesApiClient _client;
 
+        [ActivatorUtilitiesConstructor]
         public ApiClientGrpc(IOptions<ApiClientConfiguration> apiClientOptions, IMapper mapper)
         {
             _mapper = mapper;
-            _apiClientOptions = apiClientOptions.Value;
+            _client = BuildMoviesApiClient(apiClientOptions?.Value);
+        }
+
+        public ApiClientGrpc(IOptions<ApiClientConfiguration> apiClientOptions, IMapper mapper, MoviesApi.MoviesApiClient client)
+        {
+            _mapper = mapper;
+            _client = client;
         }
 
         public async Task<ShowResponse> GetByIdAsync(string id)
         {
-            throw new System.NotImplementedException();
+            var request = new IdRequest()
+            {
+                Id = id
+            };
+
+            var response = await _client.GetByIdAsync(request);
+            if (response.Success)
+            {
+                response.Data.TryUnpack<showResponse>(out var data);
+                return _mapper.Map<ShowResponse>(data);
+            }
+            
+            throw new ResourceUnavailableException(response.Exceptions.ToString());
         }
 
-        public async Task<ShowResponse> SearchAsync(string text)
+        public async Task<ShowListResponse> SearchAsync(string text)
         {
-            throw new System.NotImplementedException();
+            var request = new SearchRequest()
+            {
+                Text = text
+            };
+
+            var response = await _client.SearchAsync(request);
+            if (response.Success)
+            {
+                response.Data.TryUnpack<showListResponse>(out var data);
+                return _mapper.Map<ShowListResponse>(data);
+            }
+            
+            throw new ResourceUnavailableException(response.Exceptions.ToString());
         }
 
         public async Task<ShowListResponse> GetAllAsync()
         {
-            var client = BuildMoviesApiClient();
+            var response = await _client.GetAllAsync(new Empty());
+            if (response.Success)
+            {
+                response.Data.TryUnpack<showListResponse>(out var data);
+                return _mapper.Map<ShowListResponse>(data);
+            }
 
-            var response = await client.GetAllAsync(new Empty());
-            response.Data.TryUnpack<showListResponse>(out var data);
-            return _mapper.Map<ShowListResponse>(data);
+            throw new ResourceUnavailableException(response.Exceptions.ToString());
         }
         
-        private static MoviesApi.MoviesApiClient BuildMoviesApiClient()
+        private MoviesApi.MoviesApiClient BuildMoviesApiClient(ApiClientConfiguration configuration)
         {
             var httpHandler = new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback =
                     HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
+            
+            
+            var callCredentials = CallCredentials.FromInterceptor((context, metadata) =>
+            {
+                if (!string.IsNullOrEmpty(configuration.ApiKey))
+                {
+                    metadata.Add("X-Apikey", $"{configuration.ApiKey}");
+                }
+                return Task.CompletedTask;
+            });
 
             var channel =
-                GrpcChannel.ForAddress("https://localhost:7443", new GrpcChannelOptions()
+                GrpcChannel.ForAddress(configuration.BaseAddress, new GrpcChannelOptions()
                 {
-                    HttpHandler = httpHandler
+                    HttpHandler = httpHandler,
+                    Credentials = ChannelCredentials.Create(new SslCredentials(), callCredentials),
+                    
                 });
             var client = new MoviesApi.MoviesApiClient(channel);
             return client;

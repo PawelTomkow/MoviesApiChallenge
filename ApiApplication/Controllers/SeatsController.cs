@@ -14,13 +14,13 @@ namespace ApiApplication.Controllers
         }
 
         [HttpGet("{auditoriumId}")]
-        public async Task<IActionResult> GetSeatsByAuditoriumIdAsync([FromQuery] int auditoriumId)
+        public async Task<IActionResult> GetSeatsByAuditoriumIdAsync(int auditoriumId)
         {
             throw new NotImplementedException();
         }
 
         [HttpGet("status/{showtimeId}")]
-        public async Task<IActionResult> GetShowtimeSeatsWithStatusAsync([FromQuery] int showtimeId)
+        public async Task<IActionResult> GetShowtimeSeatsWithStatusAsync(int showtimeId)
         {
             throw new NotImplementedException();
         }

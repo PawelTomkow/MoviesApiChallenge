@@ -1,3 +1,5 @@
+using System;
+using ApiApplication.Clients;
 using ApiApplication.Configurations;
 using ApiApplication.Core.Services;
 using ApiApplication.Database;
@@ -32,6 +34,7 @@ namespace ApiApplication
             services.AddAutoMapper(typeof(Startup));
             services.AddValidatorsFromAssemblyContaining(typeof(Startup));
 
+            services.AddScoped<IApiClient, ApiClientGrpc>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
             services.AddTransient<ITicketsRepository, TicketsRepository>();

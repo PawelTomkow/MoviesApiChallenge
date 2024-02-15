@@ -23,7 +23,7 @@ namespace ApiApplication.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync([FromQuery] int id)
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
             if (id <= 0)
             {

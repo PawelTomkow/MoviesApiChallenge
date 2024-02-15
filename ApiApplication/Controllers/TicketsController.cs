@@ -21,7 +21,7 @@ namespace ApiApplication.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActivator> GetTicketAsync([FromQuery] Guid id)
+        public async Task<IActivator> GetTicketAsync(Guid id)
         {
             throw new NotImplementedException();
         }
