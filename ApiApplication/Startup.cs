@@ -1,5 +1,6 @@
 using System;
 using ApiApplication.Clients;
+using ApiApplication.Clients.Cache;
 using ApiApplication.Configurations;
 using ApiApplication.Core.Services;
 using ApiApplication.Database;
@@ -29,11 +30,14 @@ namespace ApiApplication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<ApiClientConfiguration>(Configuration.GetSection(ApiClientConfiguration.ApiClient));
+            services.Configure<ApiClientConfiguration>(Configuration.GetSection(ApiClientConfiguration.Name));
+            services.Configure<CacheConfiguration>(Configuration.GetSection(CacheConfiguration.Name));
+            services.Configure<ReservationConfiguration>(Configuration.GetSection(ReservationConfiguration.Name));
 
             services.AddAutoMapper(typeof(Startup));
             services.AddValidatorsFromAssemblyContaining(typeof(Startup));
 
+            services.AddScoped<ICacheRepository, RedisCacheRepository>();
             services.AddScoped<IApiClient, ApiClientGrpc>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();

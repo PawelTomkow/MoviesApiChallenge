@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using ApiApplication.Clients;
+using ApiApplication.Clients.Cache;
 using ApiApplication.Clients.Contracts;
 using ApiApplication.Configurations;
 using ApiApplication.Configurations.Mapper;
@@ -13,8 +14,10 @@ using FluentAssertions;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using Grpc.Core.Testing;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 using ProtoDefinitions;
 
@@ -28,6 +31,8 @@ namespace ApiApplication.Tests
         private MoviesApi.MoviesApiClient _moviesApiClient;
         private ApiClientGrpc _apiClient;
         private Fixture _fixture;
+        private ILogger<ApiClientGrpc> _logger;
+        private ICacheRepository _cache;
 
         [SetUp]
         public void Setup()
@@ -43,8 +48,10 @@ namespace ApiApplication.Tests
                 ApiKey = "your_api_key",
                 BaseAddress = "http://example.com"
             });
+            _logger = Substitute.For<ILogger<ApiClientGrpc>>();
             _moviesApiClient = Substitute.For<MoviesApi.MoviesApiClient>();
-            _apiClient = new ApiClientGrpc(_apiClientOptions, _mapper, _moviesApiClient);
+            _cache = Substitute.For<ICacheRepository>();
+            _apiClient = new ApiClientGrpc(_apiClientOptions, _mapper, _moviesApiClient, _cache, _logger);
             _fixture = new Fixture();
         }
 
@@ -78,18 +85,14 @@ namespace ApiApplication.Tests
         }
         
         [Test]
-        public async Task GetByIdAsync_ShouldReturnThrow_ReturnsMappedData()
+        public async Task GetByIdAsync_ShouldReturnSuccessfulResponse_ReturnsShowResponseFromCacheWhenGrpcNotWorking()
         {
             // Arrange
             const string id = "123";
-            var expectedResponse = _fixture.Create<showResponse>();
-            var responseModel = _fixture.Create<responseModel>();
-            responseModel.Data = Google.Protobuf.WellKnownTypes.Any.Pack(expectedResponse);
-            responseModel.Success = true;
-            var call = TestCalls.AsyncUnaryCall(Task.FromResult(responseModel), Task.FromResult(new Metadata()),
-                () => Status.DefaultSuccess, () => new Metadata(), () => { });
-            _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Returns(call);
-
+            var expectedResponse = _fixture.Create<ShowResponse>();
+            _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Throws(new RpcException(new Status(StatusCode.Cancelled, "detail")));
+            _cache.GetValueAsync<ShowResponse>(Arg.Any<string>()).Returns(expectedResponse);
+            
             // Act
             var result = await _apiClient.GetByIdAsync(id);
 
@@ -104,6 +107,22 @@ namespace ApiApplication.Tests
             result.Crew.Should().Be(expectedResponse.Crew);
             result.ImDbRating.Should().Be(expectedResponse.ImDbRating);
             result.ImDbRatingCount.Should().Be(expectedResponse.ImDbRatingCount);
+        }
+        
+        [Test]
+        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenGrpcAndCacheUnavailable()
+        {
+            // Arrange
+            const string id = "123";
+            var expectedResponse = _fixture.Create<ShowResponse>();
+            _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Throws(new RpcException(new Status(StatusCode.Cancelled, "detail")));
+            _cache.GetValueAsync<ShowResponse>(Arg.Any<string>()).Returns(default(ShowResponse));
+            
+            // Act
+            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
+
+            // Assert
+            await act.Should().ThrowAsync<ResourceUnavailableException>();
         }
         
         [Test]
@@ -177,6 +196,22 @@ namespace ApiApplication.Tests
         }
         
         [Test]
+        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenGrpcAndCacheUnavailable()
+        {
+            // Arrange
+            const string id = "123";
+            var expectedResponse = _fixture.Create<ShowListResponse>();
+            _moviesApiClient.SearchAsync(Arg.Any<SearchRequest>()).Throws(new RpcException(new Status(StatusCode.Cancelled, "detail")));
+            _cache.GetValueAsync<ShowListResponse>(Arg.Any<string>()).Returns(default(ShowListResponse));
+            
+            // Act
+            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
+
+            // Assert
+            await act.Should().ThrowAsync<ResourceUnavailableException>();
+        }
+        
+        [Test]
         public async Task GetAllAsync_ShouldReturnSuccessfulResponse_ReturnsMappedData()
         {
             // Arrange
@@ -221,6 +256,22 @@ namespace ApiApplication.Tests
 
             // Act
             Func<Task> act = async () => await _apiClient.GetAllAsync();
+
+            // Assert
+            await act.Should().ThrowAsync<ResourceUnavailableException>();
+        }
+        
+        [Test]
+        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenGrpcAndCacheUnavailable()
+        {
+            // Arrange
+            const string id = "123";
+            var expectedResponse = _fixture.Create<ShowListResponse>();
+            _moviesApiClient.GetAllAsync(Arg.Any<Empty>()).Throws(new RpcException(new Status(StatusCode.Cancelled, "detail")));
+            _cache.GetValueAsync<ShowListResponse>(Arg.Any<string>()).Returns(default(ShowListResponse));
+            
+            // Act
+            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();

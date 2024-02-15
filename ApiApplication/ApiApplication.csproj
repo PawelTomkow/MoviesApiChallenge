@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.22" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.7.17" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
@@ -26,10 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiApplication.Core\ApiApplication.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Clients\Cache\" />
   </ItemGroup>
 
 </Project>
