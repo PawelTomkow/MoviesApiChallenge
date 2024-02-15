@@ -9,6 +9,7 @@ namespace ApiApplication.Configurations.Mapper
         public ShowListResponseProfile()
         {
             CreateMap<ShowListResponse, showListResponse>()
+                .ForMember(dest => dest.Shows, opt => opt.MapFrom(src => src.ShowResponses))
                 .ReverseMap();
         }
     }

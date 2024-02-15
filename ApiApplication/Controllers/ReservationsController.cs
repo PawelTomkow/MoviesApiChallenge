@@ -20,7 +20,7 @@ namespace ApiApplication.Controllers
         }
         
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetReservationByIdAsync([FromQuery] string id)
+        public async Task<IActionResult> GetReservationByIdAsync(string id)
         {
             throw new NotImplementedException();
         }

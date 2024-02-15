@@ -5,17 +5,17 @@ namespace ApiApplication.Clients
 {
     public class ApiClientHttp : IApiClient
     {
-        public async Task<ShowResponse> GetByIdAsync(string id)
+        public Task<ShowResponse> GetByIdAsync(string id)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task<ShowResponse> SearchAsync(string text)
+        public Task<ShowListResponse> SearchAsync(string text)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task<ShowListResponse> GetAllAsync()
+        public Task<ShowListResponse> GetAllAsync()
         {
             throw new System.NotImplementedException();
         }
