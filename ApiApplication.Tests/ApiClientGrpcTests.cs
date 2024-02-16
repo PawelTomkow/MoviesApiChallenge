@@ -29,7 +29,7 @@ namespace ApiApplication.Tests
         private IMapper _mapper;
         private IOptions<ApiClientConfiguration> _apiClientOptions;
         private MoviesApi.MoviesApiClient _moviesApiClient;
-        private ApiClientGrpc _apiClient;
+        private ApiClientGrpc _sut;
         private Fixture _fixture;
         private ILogger<ApiClientGrpc> _logger;
         private ICacheRepository _cache;
@@ -51,11 +51,13 @@ namespace ApiApplication.Tests
             _logger = Substitute.For<ILogger<ApiClientGrpc>>();
             _moviesApiClient = Substitute.For<MoviesApi.MoviesApiClient>();
             _cache = Substitute.For<ICacheRepository>();
-            _apiClient = new ApiClientGrpc(_apiClientOptions, _mapper, _moviesApiClient, _cache, _logger);
             _fixture = new Fixture();
+            _sut = new ApiClientGrpc(_apiClientOptions, _mapper, _moviesApiClient, _cache, _logger);
         }
 
-        [Test]
+        #region GetByIdAsync
+
+         [Test]
         public async Task GetByIdAsync_ShouldReturnSuccessfulResponse_ReturnsMappedData()
         {
             // Arrange
@@ -69,7 +71,7 @@ namespace ApiApplication.Tests
             _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Returns(call);
 
             // Act
-            var result = await _apiClient.GetByIdAsync(id);
+            var result = await _sut.GetByIdAsync(id);
 
             // Assert
             result.Should().NotBeNull();
@@ -94,7 +96,7 @@ namespace ApiApplication.Tests
             _cache.GetValueAsync<ShowResponse>(Arg.Any<string>()).Returns(expectedResponse);
             
             // Act
-            var result = await _apiClient.GetByIdAsync(id);
+            var result = await _sut.GetByIdAsync(id);
 
             // Assert
             result.Should().NotBeNull();
@@ -119,7 +121,7 @@ namespace ApiApplication.Tests
             _cache.GetValueAsync<ShowResponse>(Arg.Any<string>()).Returns(default(ShowResponse));
             
             // Act
-            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
+            Func<Task> act = async () => await _sut.GetByIdAsync(id);
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();
@@ -137,12 +139,35 @@ namespace ApiApplication.Tests
             _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Returns(call);
 
             // Act
-            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
+            Func<Task> act = async () => await _sut.GetByIdAsync(id);
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();
         }
         
+        [TestCase("")]
+        [TestCase(" ")]
+        [TestCase(null)]
+        public async Task GetByIdAsync_ShouldThrowArgumentException_WhenIdIsIncorrect(string id)
+        {
+            //Arrange
+            var responseModel = _fixture.Create<responseModel>();
+            responseModel.Success = false;
+            var call = TestCalls.AsyncUnaryCall(Task.FromResult(responseModel), Task.FromResult(new Metadata()),
+                () => Status.DefaultSuccess, () => new Metadata(), () => { });
+            _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Returns(call);
+            //Act
+            Func<Task> act = async () => await _sut.GetByIdAsync(id);
+
+            //Assert
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        #endregion
+
+        #region SearchAsync
+
+          
         [Test]
         public async Task SearchAsync_ShouldReturnSuccessfulResponse_ReturnsMappedData()
         {
@@ -159,7 +184,7 @@ namespace ApiApplication.Tests
             _moviesApiClient.SearchAsync(Arg.Any<SearchRequest>()).Returns(call);
 
             // Act
-            var result = await _apiClient.SearchAsync(id);
+            var result = await _sut.SearchAsync(id);
 
             // Assert
             result.Should().NotBeNull();
@@ -189,7 +214,7 @@ namespace ApiApplication.Tests
             _moviesApiClient.SearchAsync(Arg.Any<SearchRequest>()).Returns(call);
 
             // Act
-            Func<Task> act = async () => await _apiClient.SearchAsync(id);
+            Func<Task> act = async () => await _sut.SearchAsync(id);
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();
@@ -205,12 +230,16 @@ namespace ApiApplication.Tests
             _cache.GetValueAsync<ShowListResponse>(Arg.Any<string>()).Returns(default(ShowListResponse));
             
             // Act
-            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
+            Func<Task> act = async () => await _sut.GetByIdAsync(id);
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();
         }
-        
+
+        #endregion
+
+        #region GetAllAsync
+
         [Test]
         public async Task GetAllAsync_ShouldReturnSuccessfulResponse_ReturnsMappedData()
         {
@@ -226,7 +255,7 @@ namespace ApiApplication.Tests
             _moviesApiClient.GetAllAsync(Arg.Any<Empty>()).Returns(call);
 
             // Act
-            var result = await _apiClient.GetAllAsync();
+            var result = await _sut.GetAllAsync();
 
             // Assert
             result.Should().NotBeNull();
@@ -255,7 +284,7 @@ namespace ApiApplication.Tests
             _moviesApiClient.GetAllAsync(Arg.Any<Empty>()).Returns(call);
 
             // Act
-            Func<Task> act = async () => await _apiClient.GetAllAsync();
+            Func<Task> act = async () => await _sut.GetAllAsync();
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();
@@ -271,18 +300,18 @@ namespace ApiApplication.Tests
             _cache.GetValueAsync<ShowListResponse>(Arg.Any<string>()).Returns(default(ShowListResponse));
             
             // Act
-            Func<Task> act = async () => await _apiClient.GetByIdAsync(id);
+            Func<Task> act = async () => await _sut.GetByIdAsync(id);
 
             // Assert
             await act.Should().ThrowAsync<ResourceUnavailableException>();
         }
 
+        #endregion
+        
         private void SetPrivateField(object obj, string fieldName, object value)
         {
             var field = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             if (field != null) field.SetValue(obj, value);
         }
-        
-        // Write similar tests for other methods...
     }
 }

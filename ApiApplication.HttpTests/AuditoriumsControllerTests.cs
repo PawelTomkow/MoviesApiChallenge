@@ -79,7 +79,7 @@ namespace ApiApplication.HttpTests
             var resultObj = await DeserializeHttpContentAsync<ErrorResponse>(result);
             resultObj.Should().NotBeNull();
             resultObj.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
-            resultObj.ErrorMessage.Should().Be("Invalid request.");
+            resultObj.Message.Should().Be("Invalid request.");
         }
     }
 }

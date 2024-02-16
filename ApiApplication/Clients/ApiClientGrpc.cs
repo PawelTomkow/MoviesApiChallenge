@@ -29,10 +29,22 @@ namespace ApiApplication.Clients
             ICacheRepository cacheRepository,
             ILogger<ApiClientGrpc> logger)
         {
+            var clientConfiguration = apiClientOptions.Value;
+            
+            if (clientConfiguration is null)
+            {
+                throw new ConfigurationException("Can not load ApiClientConfiguration.");
+            }
+
+            if (string.IsNullOrWhiteSpace(clientConfiguration.BaseAddress))
+            {
+                throw new ConfigurationException($"BaseAddress can not be null or empty");
+            }
+            
             _mapper = mapper;
             _cacheRepository = cacheRepository;
             _logger = logger;
-            _client = BuildMoviesApiClient(apiClientOptions?.Value);
+            _client = BuildMoviesApiClient(apiClientOptions.Value);
         }
 
         public ApiClientGrpc(IOptions<ApiClientConfiguration> apiClientOptions, 
@@ -49,6 +61,11 @@ namespace ApiApplication.Clients
 
         public async Task<ShowResponse> GetByIdAsync(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentException($"Argument {nameof(id)} is incorrect.");
+            }
+            
             var request = new IdRequest()
             {
                 Id = id

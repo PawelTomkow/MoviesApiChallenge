@@ -2,6 +2,7 @@ using System;
 using ApiApplication.Clients;
 using ApiApplication.Clients.Cache;
 using ApiApplication.Configurations;
+using ApiApplication.Configurations.Extensions;
 using ApiApplication.Core.Services;
 using ApiApplication.Database;
 using ApiApplication.Database.Repositories;
@@ -38,8 +39,9 @@ namespace ApiApplication
             services.AddValidatorsFromAssemblyContaining(typeof(Startup));
 
             services.AddScoped<ICacheRepository, RedisCacheRepository>();
-            services.AddScoped<IApiClient, ApiClientGrpc>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+            services.AddApiClient(Configuration);
+            
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
             services.AddTransient<ITicketsRepository, TicketsRepository>();
             services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
