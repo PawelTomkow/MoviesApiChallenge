@@ -1,17 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ApiApplication.Clients;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiApplication.Controllers
 {
     [ApiController]
-    [Route("test/grpc")]
-    public class GrpcTestController : ControllerBase
+    [Route("test/api-client")]
+    public class ApiClientTestController : ControllerBase
     {
         private readonly IApiClient _apiClient;
 
-        public GrpcTestController(IApiClient apiClient)
+        public ApiClientTestController(IApiClient apiClient)
         {
             _apiClient = apiClient;
         }

@@ -46,6 +46,8 @@ namespace ApiApplication
             services.AddTransient<ITicketsRepository, TicketsRepository>();
             services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
 
+            services.AddScoped<IMovieService, MovieService>();
+            
             services.AddDbContext<CinemaContext>(options =>
             {
                 options.UseInMemoryDatabase("CinemaDb")

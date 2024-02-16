@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ApiApplication.Controllers.Contracts.Repertoires;
+using ApiApplication.Controllers.Contracts.Movies;
 using ApiApplication.Core.Models;
 using ApiApplication.HttpTests.Base;
 using FluentAssertions;
@@ -41,8 +41,8 @@ namespace ApiApplication.HttpTests
             response.Should().NotBeNull();
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var responseObject = await DeserializeHttpContentAsync<PossibleRepertoiresResponse>(response);
-            responseObject.Repertoires.Should().BeOfType<IEnumerable<Movie>>();
+            var responseObject = await DeserializeHttpContentAsync<MoviesResponse>(response);
+            responseObject.Movies.Should().BeOfType<List<Movie>>();
         }
     }
 }
