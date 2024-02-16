@@ -15,10 +15,9 @@ using Flurl.Http.Testing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 
-namespace ApiApplication.Tests
+namespace ApiApplication.Tests.Clients
 {
     [TestFixture]
     public class ApiClientHttpTests

@@ -1,5 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using ApiApplication.Clients;
+using ApiApplication.Controllers.Contracts.Movies;
+using ApiApplication.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiApplication.Controllers
@@ -8,15 +10,21 @@ namespace ApiApplication.Controllers
     [Route("api/movies")]
     public class MoviesController : ControllerBase
     {
-        public MoviesController()
+        private readonly IMovieService _service;
+
+        public MoviesController(IMovieService service)
         {
-            
+            _service = service;
         }
         
         [HttpGet("all")]
-        public async Task<IActionResult> GetRepertoiresAsync()
+        public async Task<IActionResult> GetMoviesAsync()
         {
-            throw new NotImplementedException();
+            var result = await _service.GetAll();
+            return Ok(new MoviesResponse
+            {
+                Movies = result
+            });
         }
     }
 }

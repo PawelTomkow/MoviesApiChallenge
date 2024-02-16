@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -41,12 +42,18 @@ namespace ApiApplication.HttpTests.Base
 
         public (TestServer, HttpClient) CreateTestServerSetup()
         {
+            var appSettingsConfiguration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+            
             var configuration = new Dictionary<string, string>
             {
                 {"IsTest", "true"}
             };
             
             var server = new TestServer(new WebHostBuilder()
+                .UseConfiguration(appSettingsConfiguration)
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     config.AddInMemoryCollection(configuration);

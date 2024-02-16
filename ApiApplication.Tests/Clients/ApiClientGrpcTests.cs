@@ -21,7 +21,7 @@ using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 using ProtoDefinitions;
 
-namespace ApiApplication.Tests
+namespace ApiApplication.Tests.Clients
 {
     [TestFixture]
     public class ApiClientGrpcTests
