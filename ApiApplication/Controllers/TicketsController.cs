@@ -36,7 +36,7 @@ namespace ApiApplication.Controllers
                 return BadRequest(new ErrorResponse
                 {
                     StatusCode = (int)HttpStatusCode.BadRequest,
-                    ErrorMessage = "Invalid request."
+                    Message = "Invalid request."
                 });
             }
             

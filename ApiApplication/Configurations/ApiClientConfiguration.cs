@@ -1,4 +1,6 @@
-﻿namespace ApiApplication.Configurations
+﻿using ApiApplication.Core.Exceptions;
+
+namespace ApiApplication.Configurations
 {
     public class ApiClientConfiguration
     {

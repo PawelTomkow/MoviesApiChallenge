@@ -67,7 +67,7 @@ namespace ApiApplication.HttpTests
             result.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
             var resultObj = await DeserializeHttpContentAsync<ErrorResponse>(result);
-            resultObj.ErrorMessage.Should().BeEmpty()
+            resultObj.Message.Should().BeEmpty()
                 .And.Be("Invalid request.");
         }
 
@@ -108,7 +108,7 @@ namespace ApiApplication.HttpTests
             
             var responseErrorMessage = await DeserializeHttpContentAsync<ErrorResponse>(result);
             responseErrorMessage.Should().NotBeNull();
-            responseErrorMessage.ErrorMessage.Should().Be("Invalid request.");
+            responseErrorMessage.Message.Should().Be("Invalid request.");
             responseErrorMessage.StatusCode.Should().Be((int)result.StatusCode);
         }
     }

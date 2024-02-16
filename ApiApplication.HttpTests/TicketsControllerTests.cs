@@ -70,7 +70,7 @@ namespace ApiApplication.HttpTests
         
             var responseErrorMessage = await DeserializeHttpContentAsync<ErrorResponse>(result);
             responseErrorMessage.Should().NotBeNull();
-            responseErrorMessage.ErrorMessage.Should().Be("Invalid request.");
+            responseErrorMessage.Message.Should().Be("Invalid request.");
             responseErrorMessage.StatusCode.Should().Be((int)result.StatusCode);
         }
         
@@ -113,7 +113,7 @@ namespace ApiApplication.HttpTests
         
             var responseErrorMessage = await DeserializeHttpContentAsync<ErrorResponse>(result);
             responseErrorMessage.Should().NotBeNull();
-            responseErrorMessage.ErrorMessage.Should().Be("Reservation not found.");
+            responseErrorMessage.Message.Should().Be("Reservation not found.");
             responseErrorMessage.StatusCode.Should().Be((int)result.StatusCode);
         }
         
