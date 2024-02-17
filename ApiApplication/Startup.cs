@@ -40,7 +40,9 @@ namespace ApiApplication
 
             services.AddScoped<ICacheRepository, RedisCacheRepository>();
             services.AddScoped<IDateTimeProvider, DateTimeProvider>();
-            services.AddApiClient(Configuration);
+            services
+                .AddCache(Configuration)
+                .AddApiClient(Configuration);
             
             services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
             services.AddTransient<ITicketsRepository, TicketsRepository>();

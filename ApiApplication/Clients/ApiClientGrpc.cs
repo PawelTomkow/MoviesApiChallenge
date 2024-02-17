@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ApiApplication.Clients.Cache;
@@ -93,11 +94,6 @@ namespace ApiApplication.Clients
                 response = await _cacheRepository.GetValueAsync<ShowResponse>($"{Name}-get-by-id-{id}");
             }
 
-            if (response?.Id is null)
-            {
-                throw new ResourceUnavailableException($"Can not access to resource with id: {id}");
-            }
-
             return response;
         }
 
@@ -130,9 +126,12 @@ namespace ApiApplication.Clients
                 response = await _cacheRepository.GetValueAsync<ShowListResponse>($"{Name}-search-{text}");
             }
             
-            if (response?.ShowResponses is null)
+            if (response is null)
             {
-                throw new ResourceUnavailableException($"Can not access to resource with id: {text}");
+                return new ShowListResponse
+                {
+                    ShowResponses = new List<ShowResponse>()
+                };
             }
 
             return response;
@@ -161,10 +160,13 @@ namespace ApiApplication.Clients
                 _logger.LogError("Can not get data from grpc GetAllAsync resource. Error: {exception}", e);
                 response = await _cacheRepository.GetValueAsync<ShowListResponse>($"{Name}-get-all");
             }
-            
-            if (response?.ShowResponses is null)
+
+            if (response is null)
             {
-                throw new ResourceUnavailableException($"Can not access to resource.");
+                return new ShowListResponse
+                {
+                    ShowResponses = new List<ShowResponse>()
+                };
             }
 
             return response;
