@@ -12,6 +12,7 @@ namespace ApiApplication.Configurations.Mapper
                 .ReverseMap();
 
             CreateMap<Movie, MovieEntity>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
 
             CreateMap<Seat, SeatEntity>()

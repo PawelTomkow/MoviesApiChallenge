@@ -2,6 +2,6 @@
 {
     public class CreateShowtimeResponse
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
     }
 }

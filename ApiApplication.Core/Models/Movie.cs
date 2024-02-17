@@ -1,8 +1,11 @@
-﻿namespace ApiApplication.Core.Models
+﻿using System.Collections.Generic;
+
+namespace ApiApplication.Core.Models
 {
     public class Movie
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
+        public string ImdbId { get; set; }
         public string Rank { get; set; }
         public string Title { get; set; }
         public string FullTitle { get; set; }

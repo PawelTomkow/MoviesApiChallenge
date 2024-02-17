@@ -13,7 +13,7 @@ namespace ApiApplication.Validators.Controllers.Contracts
 
             RuleFor(x => x.SessionDate).NotNull();
 
-            RuleFor(x => x.MovieId)
+            RuleFor(x => x.ImdbMovieId)
                 .NotEmpty()
                 .WithMessage("MovieId can not be empty.");
         }

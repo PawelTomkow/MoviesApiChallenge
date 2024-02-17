@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ApiApplication.Clients;
 using ApiApplication.Database;
 using ApiApplication.HttpTests.Base.FixtureExtensions;
 using AutoFixture;
@@ -13,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NUnit.Framework;
 
 namespace ApiApplication.HttpTests.Base
@@ -59,6 +62,18 @@ namespace ApiApplication.HttpTests.Base
                     config.AddInMemoryCollection(configuration);
                 })
                 .UseStartup<Startup>()
+                .ConfigureTestServices(services =>
+                {
+                    var descriptor = services.SingleOrDefault(
+                        d => d.ServiceType ==
+                             typeof(IApiClient)); // Replace DbContext with the service you want to remove
+                    if (descriptor != null)
+                    {
+                        services.Remove(descriptor);
+                    }
+
+                    services.AddScoped<IApiClient, TestApiClient>();
+                })
             );
             var client = server.CreateClient();
 
