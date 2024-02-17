@@ -7,6 +7,7 @@ using ApiApplication.Core.Services;
 using ApiApplication.Database;
 using ApiApplication.Database.Repositories;
 using ApiApplication.Database.Repositories.Abstractions;
+using ApiApplication.Middlewares;
 using ApiApplication.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
@@ -49,6 +50,7 @@ namespace ApiApplication
             services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
 
             services.AddScoped<IMovieService, MovieService>();
+            services.AddScoped<IAuditoriumService, AuditoriumService>();
             
             services.AddDbContext<CinemaContext>(options =>
             {
@@ -74,6 +76,9 @@ namespace ApiApplication
 
             app.UseHttpsRedirection();
 
+            app.UseMiddleware<CancellationTokenMiddleware>();
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
+            
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
