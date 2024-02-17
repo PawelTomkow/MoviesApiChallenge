@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using ApiApplication.Core.Models;
 using ApiApplication.Database;
 using ApiApplication.Database.Entities;
@@ -33,6 +35,19 @@ namespace ApiApplication.HttpTests.Base
             _dbContext.SaveChanges();
 
             return auditoriumEntity!.Id;
+        }
+        
+        public void AddNewAuditoriumsToDatabase(List<Auditorium> auditoriums)
+        {
+            if (auditoriums is null || !auditoriums.Any())
+            {
+                throw new ArgumentException("Parameter 'auditorium' can not be null.");
+            }
+            
+            var auditoriumEntity = _mapper.Map<List<AuditoriumEntity>>(auditoriums);
+            
+            _dbContext.Auditoriums.AddRange(auditoriumEntity);
+            _dbContext.SaveChanges();
         }
 
         public int AddNewShowtimeToDatabase(Showtime showtime)

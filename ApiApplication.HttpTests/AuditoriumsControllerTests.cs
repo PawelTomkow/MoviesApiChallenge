@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ApiApplication.Controllers.Contracts;
@@ -35,6 +36,10 @@ namespace ApiApplication.HttpTests
         [Test]
         public async Task GetAllAsync_ShouldReturn200AndGetAllAuditoriumsResponse()
         {
+            //Arrange
+            var auditorium = Fixture.Create<List<Auditorium>>();
+            _testDataDbSeeder.AddNewAuditoriumsToDatabase(auditorium);
+            
             //Act
             var response = await _client.GetAsync("api/auditorium/all");
 
@@ -80,6 +85,24 @@ namespace ApiApplication.HttpTests
             resultObj.Should().NotBeNull();
             resultObj.StatusCode.Should().Be((int)HttpStatusCode.BadRequest);
             resultObj.Message.Should().Be("Invalid request.");
+        }
+        
+        [Test]
+        public async Task GetByIdAsync_ShouldReturn404_WhenNotExist()
+        {
+            //Arrange
+            const int notExistedAuditoriumId = 99999999;
+
+            //Act
+            var result = await _client.GetAsync($"api/auditorium/{notExistedAuditoriumId}");
+
+            //Assert
+            result.Should().NotBeNull();
+            result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            var resultObj = await DeserializeHttpContentAsync<ErrorResponse>(result);
+            resultObj.Should().NotBeNull();
+            resultObj.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
+            resultObj.Message.Should().Be($"Auditorium with id: {notExistedAuditoriumId} not found.");
         }
     }
 }
