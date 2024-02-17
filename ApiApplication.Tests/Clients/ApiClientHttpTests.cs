@@ -89,7 +89,7 @@ namespace ApiApplication.Tests.Clients
 
         [TestCase(401)]
         [TestCase(404)]
-        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenStatusCodeIs(int statusCode)
+        public async Task GetByIdAsync_ShouldReturnNull_WhenStatusCodeIs(int statusCode)
         {
             //Arrange
             var expectedErrorResponse = _fixture.Create<ErrorResponse>();
@@ -97,16 +97,15 @@ namespace ApiApplication.Tests.Clients
                 .RespondWithJson(expectedErrorResponse, status: statusCode);
             
             //Act
-            Func<Task> act = async () => await _sut.GetByIdAsync("123");
+            var result = await _sut.GetByIdAsync("123");
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().BeNull();
         }
         
         [TestCase(500)]
         [TestCase(418)]
-        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenNotSupportedStatusCodeIs(int statusCode)
+        public async Task GetByIdAsync_ShouldReturnNull_WhenNotSupportedStatusCodeIs(int statusCode)
         {
             //Arrange
             var expectedErrorResponse = _fixture.Create<ErrorResponse>();
@@ -114,30 +113,28 @@ namespace ApiApplication.Tests.Clients
                 .RespondWithJson(expectedErrorResponse, status: statusCode);
             
             //Act
-            Func<Task> act = async () => await _sut.GetByIdAsync("123");
+            var result = await _sut.GetByIdAsync("123");
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().BeNull();
         }
         
         [Test]
-        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenFlurlIsThrowingFlurlHttpTimeoutException()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenFlurlIsThrowingFlurlHttpTimeoutException()
         {
             //Arrange
             _httpTest
                 .SimulateTimeout();
             
             //Act
-            Func<Task> act = async () => await _sut.GetByIdAsync("123");
+            var result = await _sut.GetByIdAsync("123");
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().BeNull();
         }
         
         [Test]
-        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenFlurlIsThrowingUnknownException()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenFlurlIsThrowingUnknownException()
         {
             //Arrange
             var unknownException = Substitute.For<UnknownErrorException>();
@@ -145,11 +142,10 @@ namespace ApiApplication.Tests.Clients
                 .SimulateException(unknownException);
             
             //Act
-            Func<Task> act = async () => await _sut.GetByIdAsync("123");
+            var result = await _sut.GetByIdAsync("123");
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().BeNull();
         }
 
         #endregion
@@ -192,7 +188,7 @@ namespace ApiApplication.Tests.Clients
 
         [TestCase(401)]
         [TestCase(404)]
-        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenStatusCodeIs(int statusCode)
+        public async Task SearchAsync_ShouldReturnShowListResponseWithEmptyList_WhenStatusCodeIs(int statusCode)
         {
             //Arrange
             var expectedErrorResponse = _fixture.Create<ErrorResponse>();
@@ -200,16 +196,16 @@ namespace ApiApplication.Tests.Clients
                 .RespondWithJson(expectedErrorResponse, status: statusCode);
             
             //Act
-            Func<Task> act = async () => await _sut.SearchAsync("123");
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [TestCase(500)]
         [TestCase(418)]
-        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenNotSupportedStatusCodeIs(int statusCode)
+        public async Task SearchAsync_ShouldReturnShowListResponseWithEmptyList_WhenNotSupportedStatusCodeIs(int statusCode)
         {
             //Arrange
             var expectedErrorResponse = _fixture.Create<ErrorResponse>();
@@ -217,30 +213,30 @@ namespace ApiApplication.Tests.Clients
                 .RespondWithJson(expectedErrorResponse, status: statusCode);
             
             //Act
-            Func<Task> act = async () => await _sut.SearchAsync("123");
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [Test]
-        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenFlurlIsThrowingFlurlHttpTimeoutException()
+        public async Task SearchAsync_ShouldReturnShowListResponseWithEmptyList_WhenFlurlIsThrowingFlurlHttpTimeoutException()
         {
             //Arrange
             _httpTest
                 .SimulateTimeout();
             
             //Act
-            Func<Task> act = async () => await _sut.SearchAsync("123");
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [Test]
-        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenFlurlIsThrowingUnknownException()
+        public async Task SearchAsync_ShouldReturnShowListResponseWithEmptyList_WhenFlurlIsThrowingUnknownException()
         {
             //Arrange
             var unknownException = Substitute.For<UnknownErrorException>();
@@ -248,11 +244,11 @@ namespace ApiApplication.Tests.Clients
                 .SimulateException(unknownException);
             
             //Act
-            Func<Task> act = async () => await _sut.SearchAsync("123");
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
 
         #endregion
@@ -278,7 +274,7 @@ namespace ApiApplication.Tests.Clients
 
         [TestCase(401)]
         [TestCase(404)]
-        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenStatusCodeIs(int statusCode)
+        public async Task GetAllAsync_ShouldReturnShowListResponseWithEmptyList_WhenStatusCodeIs(int statusCode)
         {
             //Arrange
             var expectedErrorResponse = _fixture.Create<ErrorResponse>();
@@ -286,16 +282,16 @@ namespace ApiApplication.Tests.Clients
                 .RespondWithJson(expectedErrorResponse, status: statusCode);
             
             //Act
-            Func<Task> act = async () => await _sut.GetAllAsync();
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [TestCase(500)]
         [TestCase(418)]
-        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenNotSupportedStatusCodeIs(int statusCode)
+        public async Task GetAllAsync_ShouldReturnShowListResponseWithEmptyList_WhenNotSupportedStatusCodeIs(int statusCode)
         {
             //Arrange
             var expectedErrorResponse = _fixture.Create<ErrorResponse>();
@@ -303,30 +299,30 @@ namespace ApiApplication.Tests.Clients
                 .RespondWithJson(expectedErrorResponse, status: statusCode);
             
             //Act
-            Func<Task> act = async () => await _sut.GetAllAsync();
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [Test]
-        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenFlurlIsThrowingFlurlHttpTimeoutException()
+        public async Task GetAllAsync_ShouldReturnShowListResponseWithEmptyList_WhenFlurlIsThrowingFlurlHttpTimeoutException()
         {
             //Arrange
             _httpTest
                 .SimulateTimeout();
             
             //Act
-            Func<Task> act = async () => await _sut.GetAllAsync();
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [Test]
-        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenFlurlIsThrowingUnknownException()
+        public async Task GetAllAsync_ShouldReturnShowListResponseWithEmptyList_WhenFlurlIsThrowingUnknownException()
         {
             //Arrange
             var unknownException = Substitute.For<UnknownErrorException>();
@@ -334,11 +330,11 @@ namespace ApiApplication.Tests.Clients
                 .SimulateException(unknownException);
             
             //Act
-            Func<Task> act = async () => await _sut.GetAllAsync();
+            var result = await _sut.GetAllAsync();
 
             //Assert
-            //TODO: Add checking throw exception message.
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
 
         #endregion

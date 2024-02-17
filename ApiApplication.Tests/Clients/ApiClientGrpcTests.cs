@@ -112,7 +112,7 @@ namespace ApiApplication.Tests.Clients
         }
         
         [Test]
-        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenGrpcAndCacheUnavailable()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenGrpcAndCacheUnavailable()
         {
             // Arrange
             const string id = "123";
@@ -121,14 +121,14 @@ namespace ApiApplication.Tests.Clients
             _cache.GetValueAsync<ShowResponse>(Arg.Any<string>()).Returns(default(ShowResponse));
             
             // Act
-            Func<Task> act = async () => await _sut.GetByIdAsync(id);
+            var result = await _sut.GetByIdAsync(id);
 
             // Assert
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().BeNull();
         }
         
         [Test]
-        public async Task GetByIdAsync_ShouldThrowResourceUnavailableException_WhenResponseItIsNotPossibleToGet()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenResponseItIsNotPossibleToGet()
         {
             // Arrange
             const string id = "123";
@@ -139,10 +139,10 @@ namespace ApiApplication.Tests.Clients
             _moviesApiClient.GetByIdAsync(Arg.Any<IdRequest>()).Returns(call);
 
             // Act
-            Func<Task> act = async () => await _sut.GetByIdAsync(id);
+            var result =  await _sut.GetByIdAsync(id);
 
             // Assert
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().BeNull();
         }
         
         [TestCase("")]
@@ -203,7 +203,7 @@ namespace ApiApplication.Tests.Clients
         }
         
         [Test]
-        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenResponseItIsNotPossibleToGet()
+        public async Task SearchAsync_ShouldReturnShowListResponseWithEmptyList_WhenResponseItIsNotPossibleToGet()
         {
             // Arrange
             const string id = "123";
@@ -214,26 +214,28 @@ namespace ApiApplication.Tests.Clients
             _moviesApiClient.SearchAsync(Arg.Any<SearchRequest>()).Returns(call);
 
             // Act
-            Func<Task> act = async () => await _sut.SearchAsync(id);
-
+            var result = await _sut.SearchAsync(id);
+            
             // Assert
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [Test]
-        public async Task SearchAsync_ShouldThrowResourceUnavailableException_WhenGrpcAndCacheUnavailable()
+        public async Task SearchAsync_ShouldReturnNull_WhenGrpcAndCacheUnavailable()
         {
             // Arrange
-            const string id = "123";
+            const string text = "123";
             var expectedResponse = _fixture.Create<ShowListResponse>();
             _moviesApiClient.SearchAsync(Arg.Any<SearchRequest>()).Throws(new RpcException(new Status(StatusCode.Cancelled, "detail")));
             _cache.GetValueAsync<ShowListResponse>(Arg.Any<string>()).Returns(default(ShowListResponse));
             
             // Act
-            Func<Task> act = async () => await _sut.GetByIdAsync(id);
+           var result = await _sut.SearchAsync(text);
 
             // Assert
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
 
         #endregion
@@ -274,7 +276,7 @@ namespace ApiApplication.Tests.Clients
         }
 
         [Test]
-        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenResponseItIsNotPossibleToGet()
+        public async Task GetAllAsync_ShouldReturnShowListResultWithEmptyList_WhenResponseItIsNotPossibleToGet()
         {
             // Arrange
             var responseModel = _fixture.Create<responseModel>();
@@ -284,26 +286,28 @@ namespace ApiApplication.Tests.Clients
             _moviesApiClient.GetAllAsync(Arg.Any<Empty>()).Returns(call);
 
             // Act
-            Func<Task> act = async () => await _sut.GetAllAsync();
+            var result = await _sut.GetAllAsync();
 
             // Assert
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
         
         [Test]
-        public async Task GetAllAsync_ShouldThrowResourceUnavailableException_WhenGrpcAndCacheUnavailable()
+        public async Task GetAllAsync_ShouldReturnShowListResponseWithEmptyList_WhenGrpcAndCacheUnavailable()
         {
             // Arrange
             const string id = "123";
-            var expectedResponse = _fixture.Create<ShowListResponse>();
+            _fixture.Create<ShowListResponse>();
             _moviesApiClient.GetAllAsync(Arg.Any<Empty>()).Throws(new RpcException(new Status(StatusCode.Cancelled, "detail")));
             _cache.GetValueAsync<ShowListResponse>(Arg.Any<string>()).Returns(default(ShowListResponse));
             
             // Act
-            Func<Task> act = async () => await _sut.GetByIdAsync(id);
+            var result = await _sut.GetAllAsync();
 
             // Assert
-            await act.Should().ThrowAsync<ResourceUnavailableException>();
+            result.Should().NotBeNull();
+            result.ShowResponses.Should().BeEmpty();
         }
 
         #endregion
