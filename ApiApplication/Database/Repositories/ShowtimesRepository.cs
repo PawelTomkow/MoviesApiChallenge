@@ -19,6 +19,13 @@ namespace ApiApplication.Database.Repositories
             _context = context;
         }
 
+        public async Task<ShowtimeEntity> GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            Expression<Func<ShowtimeEntity, bool>> filter = entity => entity.Id == id;
+            var entity = await GetAllAsync(filter, cancellationToken);
+            return entity.FirstOrDefault();
+        }
+
         public async Task<ShowtimeEntity> GetWithMoviesByIdAsync(int id, CancellationToken cancel)
         {
             return await _context.Showtimes

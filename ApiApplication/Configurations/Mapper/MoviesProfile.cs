@@ -9,7 +9,12 @@ namespace ApiApplication.Configurations.Mapper
         public MoviesProfile()
         {
             CreateMap<ShowResponse, Movie>()
-                .ReverseMap();
+                .ForMember(dest => dest.ImdbId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+            
+            CreateMap<Movie, ShowResponse>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ImdbId));
+
         }
     }
 }

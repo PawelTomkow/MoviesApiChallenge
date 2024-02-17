@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ApiApplication.Clients;
 using ApiApplication.Core.Models;
@@ -19,7 +20,7 @@ namespace ApiApplication.Services
             _apiClient = apiClient;
         }
         
-        public async Task<List<Movie>> GetAll()
+        public async Task<List<Movie>> GetAllAsync()
         {
             var movies = await _apiClient.GetAllAsync();
             if (movies.ShowResponses.Any())
@@ -29,5 +30,12 @@ namespace ApiApplication.Services
 
             return new List<Movie>();
         }
+
+        public async Task<Movie> GetByImdbIdAsync(string imdbMovieId, CancellationToken cancellationToken)
+        {
+            var entity = await _apiClient.GetByIdAsync(imdbMovieId);
+            return _mapper.Map<Movie>(entity);
+        }
+
     }
 }

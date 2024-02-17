@@ -1,7 +1,6 @@
 ﻿using System;
-using ApiApplication.Core.Services;
 
-namespace ApiApplication.Services
+namespace ApiApplication.Core.Services
 {
     public class DateTimeProvider : IDateTimeProvider
     {

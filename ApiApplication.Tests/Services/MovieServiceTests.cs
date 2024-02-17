@@ -5,6 +5,7 @@ using ApiApplication.Clients;
 using ApiApplication.Clients.Contracts;
 using ApiApplication.Core.Models;
 using ApiApplication.Core.Services;
+using ApiApplication.Database.Repositories.Abstractions;
 using ApiApplication.Services;
 using AutoMapper;
 using FluentAssertions;
@@ -47,7 +48,7 @@ namespace ApiApplication.Tests.Services
             _mapper.Map<List<Movie>>(Arg.Any<List<ShowResponse>>()).Returns(expectedMovies);
 
             // Act
-            var result = await _sut.GetAll();
+            var result = await _sut.GetAllAsync();
 
             // Assert
             result.Should().NotBeNull();
@@ -64,7 +65,7 @@ namespace ApiApplication.Tests.Services
             }));
 
             // Act
-            var result = await _sut.GetAll();
+            var result = await _sut.GetAllAsync();
 
             // Assert
             result.Should().NotBeNull();

@@ -57,17 +57,17 @@ namespace ApiApplication.HttpTests
             //Arrange
             var auditorium = Fixture.Create<Auditorium>();
             auditorium.Id = 0;
-            var addedAuditoriumId = _testDataDbSeeder.AddNewAuditoriumToDatabase(auditorium);
+            var auditoriumFromDb = _testDataDbSeeder.AddNewAuditoriumToDatabase(auditorium);
 
             //Act
-            var result = await _client.GetAsync($"api/auditorium/{addedAuditoriumId}");
+            var result = await _client.GetAsync($"api/auditorium/{auditoriumFromDb}");
 
             //Assert
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(HttpStatusCode.OK);
             var resultObj = await DeserializeHttpContentAsync<Auditorium>(result);
             resultObj.Should().NotBeNull();
-            resultObj.Id.Should().Be(addedAuditoriumId);
+            resultObj.Id.Should().Be(auditoriumFromDb);
         }
 
         [TestCase(-1)]

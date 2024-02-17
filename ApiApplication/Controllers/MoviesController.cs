@@ -20,7 +20,7 @@ namespace ApiApplication.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetMoviesAsync()
         {
-            var result = await _service.GetAll();
+            var result = await _service.GetAllAsync();
             return Ok(new MoviesResponse
             {
                 Movies = result

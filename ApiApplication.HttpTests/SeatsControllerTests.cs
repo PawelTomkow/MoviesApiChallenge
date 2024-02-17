@@ -75,11 +75,8 @@ namespace ApiApplication.HttpTests
         public async Task GetShowtimeSeatsWithStatus_ShouldReturn200AndSeatsWithStatus_WhenShowtimeExistAndHaveSeats()
         {
             //Arrange
-            var auditorium = Fixture.Create<Auditorium>();
-            var addedAuditoriumId = _testDataDbSeeder.AddNewAuditoriumToDatabase(auditorium);
-            var showtime = Fixture.Create<Showtime>();
-            showtime.AuditoriumId = addedAuditoriumId;
-            var addedShowtimeId = _testDataDbSeeder.AddNewShowtimeToDatabase(showtime);
+
+            var addedShowtimeId = _testDataDbSeeder.AddNewShowtimeToDatabase();
 
             //Act
             var result = await _client.GetAsync($"api/seats/status/{addedShowtimeId}");
