@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace ApiApplication.Controllers.Contracts.Tickets
+﻿namespace ApiApplication.Controllers.Contracts.Tickets
 {
     public class BuyTicketRequest
     {
-        public string ReservationId { get; set; }
+        public string TicketId { get; set; }
     }
 }

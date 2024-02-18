@@ -7,7 +7,9 @@ namespace ApiApplication.Validators.Controllers.Contracts
     {
         public BuyTicketRequestValidator()
         {
-            RuleFor(x => x.ReservationId).NotEmpty();
+            RuleFor(x => x.TicketId)
+                .NotEmpty()
+                .WithMessage("TicketId can not be empty.");
         }
     }
 }

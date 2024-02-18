@@ -5,6 +5,7 @@ namespace ApiApplication.Core.Models
     public class Showtime
     {
         public int Id { get; set; }
+        public int AuditoriumId { get; set; }
         public Movie Movie { get; set; }
         public List<Ticket> Tickets { get; set; }
     }

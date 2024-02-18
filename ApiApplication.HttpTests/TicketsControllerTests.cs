@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ApiApplication.Controllers.Contracts;
 using ApiApplication.Controllers.Contracts.Reservations;
 using ApiApplication.Controllers.Contracts.Tickets;
+using ApiApplication.Core.Models;
 using ApiApplication.HttpTests.Base;
 using FluentAssertions;
 using Microsoft.AspNetCore.TestHost;
@@ -15,16 +17,19 @@ namespace ApiApplication.HttpTests
     {
         private TestServer _server;
         private HttpClient _client;
+        private TestDataDbSeeder _testDataDbSeeder;
 
         [SetUp]
         public void Setup()
         {
             (_server, _client) = CreateTestServerSetup();
+            _testDataDbSeeder = BuildTestDataDbSeeder(_server);
         }
         
         [TearDown]
         public void TearDown()
         {
+            _testDataDbSeeder.Clear();
             _client.Dispose();
             _server.Dispose();
         }
@@ -33,14 +38,25 @@ namespace ApiApplication.HttpTests
         public async Task BuyTicketAsync_ShouldReturn201AndReservationId_WhenCreateReservationRequestIsCorrect()
         {
             //Arrange
-            var request = new BuyTicketRequest
+            _testDataDbSeeder.AddNewShowtimeToDatabase();
+            var requestReservationBody = new CreateReservationRequest
             {
-                ReservationId = "1"
+                ShowtimeId = 1,
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}},
+                AuditoriumId = 1
+            };
+
+            var responseAsObject = await CreateReservationAsync(requestReservationBody);
+            var response = await _client.GetAsync($"/api/reservations/{responseAsObject.Id}");
+            var responseObj = await DeserializeHttpContentAsync<Reservation>(response);
+            var request = new CreateTicketRequest
+            {
+                ReservationId = responseObj.Id
             };
             var requestBody = SerializeToStringContent(request);
             
             //Act
-            var result = await _client.PostAsync("api/tickets/buy", requestBody);
+            var result = await _client.PostAsync("api/tickets/create", requestBody);
 
             //Assert
             result.Should().NotBeNull();
@@ -55,7 +71,7 @@ namespace ApiApplication.HttpTests
         public async Task BuyTicketAsync_ShouldReturn400_WhenCreateReservationRequestIsInvalid(string reservationId)
         {
             //Arrange
-            var request = new BuyTicketRequest
+            var request = new CreateTicketRequest
             {
                 ReservationId = reservationId
             };
@@ -73,34 +89,15 @@ namespace ApiApplication.HttpTests
             responseErrorMessage.Message.Should().Be("Invalid request.");
             responseErrorMessage.StatusCode.Should().Be((int)result.StatusCode);
         }
-        
-        [Test]
-        public async Task GetShowtimesAsync_ShouldReturn200_WhenExitingReservationIdExist()
-        {
-            //Arrange
-            //Arrange
-            var request = new BuyTicketRequest
-            {
-                ReservationId = "1"
-            };
-
-            var responseAsObject = await BuyTicketAsync(request);
-
-            //Act
-            var response = await _client.GetAsync($"/api/showtimes/{responseAsObject.TicketId}");
-
-            //Assert
-            response.Should().NotBeNull();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
 
         [Test]
         public async Task BuyTicketAsync_ShouldReturn404_WhenReservationIdNotExist()
         {
             //Arrange
+            const string expectedTicketId = "923321";
             var request = new BuyTicketRequest
             {
-                ReservationId = "923321"
+                TicketId = expectedTicketId
             };
             var requestBody = SerializeToStringContent(request);
             
@@ -113,19 +110,42 @@ namespace ApiApplication.HttpTests
         
             var responseErrorMessage = await DeserializeHttpContentAsync<ErrorResponse>(result);
             responseErrorMessage.Should().NotBeNull();
-            responseErrorMessage.Message.Should().Be("Reservation not found.");
+            responseErrorMessage.Message.Should().Be($"Ticket with ticketId: {expectedTicketId} not found.");
             responseErrorMessage.StatusCode.Should().Be((int)result.StatusCode);
+        }
+        
+        private async Task<TicketResponse> CreateTicketAsync(CreateTicketRequest request)
+        {
+
+            var requestBodyAsStringContent = SerializeToStringContent(request);
+            
+            var responseCreatedReservation = await _client.PostAsync("api/tickets/create", requestBodyAsStringContent);
+            responseCreatedReservation.EnsureSuccessStatusCode();
+            
+            var responseAsObject = await DeserializeHttpContentAsync<TicketResponse>(responseCreatedReservation);
+            return responseAsObject;
         }
         
         private async Task<TicketResponse> BuyTicketAsync(BuyTicketRequest request)
         {
-
             var requestBodyAsStringContent = SerializeToStringContent(request);
             
             var responseCreatedReservation = await _client.PostAsync("api/tickets/buy", requestBodyAsStringContent);
             responseCreatedReservation.EnsureSuccessStatusCode();
             
             var responseAsObject = await DeserializeHttpContentAsync<TicketResponse>(responseCreatedReservation);
+            return responseAsObject;
+        }
+        
+        private async Task<CreateReservationResponse> CreateReservationAsync(CreateReservationRequest request)
+        {
+
+            var requestBodyAsStringContent = SerializeToStringContent(request);
+            
+            var responseCreatedReservation = await _client.PostAsync("/api/reservations/create", requestBodyAsStringContent);
+            responseCreatedReservation.EnsureSuccessStatusCode();
+            
+            var responseAsObject = await DeserializeHttpContentAsync<CreateReservationResponse>(responseCreatedReservation);
             return responseAsObject;
         }
     }

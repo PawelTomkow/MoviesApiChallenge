@@ -50,4 +50,25 @@ curl -X 'POST' \
 curl -X 'GET' \
   'https://localhost:7629/api/reservations/589bf430-ba1c-43eb-bbc0-8a05f866f229' \
   -H 'accept: */*'
+  
+  // Tickets 
+  
+  curl -X 'POST' \
+    'https://localhost:7629/api/tickets/create' \
+    -H 'accept: */*' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "reservationId": "0907f3e6-5993-4358-ba62-472401796223"
+  }'
+  
+  curl -X 'POST' \
+    'https://localhost:7629/api/tickets/buy' \
+    -H 'accept: */*' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "ticketId": "602a0d75-d41f-4f22-b9e8-5229b069cf65"
+  }'
 
+curl -X 'GET' \
+  'https://localhost:7629/api/tickets/602a0d75-d41f-4f22-b9e8-5229b069cf65' \
+  -H 'accept: */*'

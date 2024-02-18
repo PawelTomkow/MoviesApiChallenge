@@ -1,5 +1,3 @@
-using System;
-using ApiApplication.Clients;
 using ApiApplication.Clients.Cache;
 using ApiApplication.Configurations;
 using ApiApplication.Configurations.Extensions;
@@ -54,6 +52,7 @@ namespace ApiApplication
             services.AddScoped<IShowtimeService, ShowtimeService>();
             services.AddScoped<IReservationService, ReservationService>();
             services.AddScoped<ISeatService, SeatService>();
+            services.AddScoped<ITicketService, TicketService>();
             
             services.AddDbContext<CinemaContext>(options =>
             {
