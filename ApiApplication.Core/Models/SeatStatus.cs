@@ -2,6 +2,7 @@
 {
     public enum SeatStatus
     {
+        Unknown,
         Free,
         Reserved,
         Sold

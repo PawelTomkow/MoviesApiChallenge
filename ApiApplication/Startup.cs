@@ -52,6 +52,8 @@ namespace ApiApplication
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IAuditoriumService, AuditoriumService>();
             services.AddScoped<IShowtimeService, ShowtimeService>();
+            services.AddScoped<IReservationService, ReservationService>();
+            services.AddScoped<ISeatService, SeatService>();
             
             services.AddDbContext<CinemaContext>(options =>
             {

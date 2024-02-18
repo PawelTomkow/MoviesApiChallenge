@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using ApiApplication.Controllers.Contracts;
 using ApiApplication.Controllers.Contracts.Reservations;
+using ApiApplication.Core.Models;
 using ApiApplication.HttpTests.Base;
 using FluentAssertions;
 using Microsoft.AspNetCore.TestHost;
@@ -36,7 +37,7 @@ namespace ApiApplication.HttpTests
             var request = new CreateReservationRequest
             {
                 ShowtimeId = "1",
-                Seats = new List<int> {1}
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
             };
             var requestBody = SerializeToStringContent(request);
             
@@ -56,7 +57,7 @@ namespace ApiApplication.HttpTests
         [TestCase(null, null,-1)]
         [TestCase(null, null,1)]
         [TestCase("1",null,-1)]
-        public async Task CreateReservationAsync_ShouldReturn400_WhenCreateReservationRequestIsInvalid(string idShowtime, List<int> seats, int auditoriumId)
+        public async Task CreateReservationAsync_ShouldReturn400_WhenCreateReservationRequestIsInvalid(string idShowtime, List<Seat> seats, int auditoriumId)
         {
             //Arrange
             var request = new CreateReservationRequest
@@ -87,7 +88,7 @@ namespace ApiApplication.HttpTests
             var request = new CreateReservationRequest
             {
                 ShowtimeId = "",
-                Seats = new List<int> { 1 }
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
             };
             var requestBody = SerializeToStringContent(request);
             
@@ -112,7 +113,7 @@ namespace ApiApplication.HttpTests
             {
                 ShowtimeId = "1",
                 AuditoriumId = 1,
-                Seats = new List<int> { 1 }
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
             };
             var requestBodyAsStringContent = SerializeToStringContent(requestBody);
             var responseAsObject = await CreateReservationAsync(requestBody);
@@ -137,7 +138,7 @@ namespace ApiApplication.HttpTests
             var requestBody = new CreateReservationRequest
             {
                 ShowtimeId = "1",
-                Seats = new List<int> { 1 }
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
             };
 
             var responseAsObject = await CreateReservationAsync(requestBody);

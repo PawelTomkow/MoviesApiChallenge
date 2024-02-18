@@ -5,6 +5,6 @@ namespace ApiApplication.Controllers.Contracts.Seats
 {
     public class GetShowtimeSeatsWithStatusResponse
     {
-        public List<(Seat,SeatStatus)> SeatsWithStatus { get; set; }
+        public List<SeatWithStatus> SeatsWithStatus { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ApiApplication.Controllers.Contracts;
@@ -30,6 +31,7 @@ namespace ApiApplication.HttpTests
         [TearDown]
         public void TearDown()
         {
+            _testDataDbSeeder.Clear();
             _client.Dispose();
             _server.Dispose();
         }
@@ -39,7 +41,13 @@ namespace ApiApplication.HttpTests
             GetSeatsByAuditoriumIdAsync_ShouldReturn200AndGetSeatsByAuditoriumIdResponse_WhenAuditoriumIdExist()
         {
             //Arrange
-            var auditorium = new Auditorium();
+            var auditorium = new Auditorium
+            {
+                Seats = new List<Seat>()
+                {
+                    new Seat() {SeatNumber = 1, Row = 1}
+                }
+            };
             var addedAuditoriumId = _testDataDbSeeder.AddNewAuditoriumToDatabase(auditorium);
             
             //Act
@@ -64,11 +72,12 @@ namespace ApiApplication.HttpTests
 
             //Assert
             result.Should().NotBeNull();
-            result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-            var resultObj = await DeserializeHttpContentAsync<ErrorResponse>(result);
-            resultObj.Message.Should().BeEmpty()
-                .And.Be("Invalid request.");
+            var responseErrorMessage = await DeserializeHttpContentAsync<ErrorResponse>(result);
+            responseErrorMessage.Should().NotBeNull();
+            responseErrorMessage.Message.Should().Be("Invalid request.");
+            responseErrorMessage.StatusCode.Should().Be((int)result.StatusCode);
         }
 
         [Test]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiApplication.Clients;
@@ -86,6 +87,29 @@ namespace ApiApplication.Services
             }, cancellationToken);
 
             return createdShowtime?.Id ?? 0;
+        }
+
+        public async Task<SoldSeats> GetByIdWithAuditoriumIdAsync(int showtimeId, CancellationToken cancellationToken)
+        {
+            var showtimeEntity = await _repository.GetByIdAsync(showtimeId, cancellationToken);
+            if (showtimeEntity is null)
+            {
+                throw new ResourceNotFoundException(typeof(ShowtimeEntity), nameof(showtimeId), showtimeId.ToString());
+            }
+
+            var showtimeTickets = await _repository.GetWithTicketsByIdAsync(showtimeId, cancellationToken);
+            var soldSeats = showtimeTickets.Tickets
+                .Select(x => x.Seats)
+                .Select(x => x.ToList())
+                .SelectMany(list => list)
+                .ToList();
+            
+            return new SoldSeats
+                {
+                    Showtime = _mapper.Map<Showtime>(showtimeEntity), 
+                    AuditoriumId = showtimeEntity.AuditoriumId,
+                    Seats = _mapper.Map<List<Seat>>(soldSeats)
+                };
         }
     }
 }
