@@ -31,6 +31,27 @@ namespace ApiApplication.Database.Repositories
                 .Where(x => x.ShowtimeId == showtimeId)
                 .ToListAsync(cancel);
         }
+        
+        public async Task<TicketEntity> CreateAsync(int showtimeId, IEnumerable<SeatEntity> selectedSeats, CancellationToken cancel)
+        {
+            var showtime = await _context.Showtimes.FirstOrDefaultAsync(x => x.Id == showtimeId, cancel);
+            var ticketEntity = new TicketEntity
+            {
+                Showtime = showtime,
+                Seats = new List<SeatEntity>()
+            };
+            var ticket = _context.Tickets.Add(ticketEntity);
+
+            foreach (var seat in selectedSeats)
+            {
+                _context.Attach(seat);
+                ticketEntity.Seats.Add(seat);
+            }
+
+            await _context.SaveChangesAsync(cancel);
+            
+            return ticket.Entity;
+        }
 
         public async Task<TicketEntity> CreateAsync(ShowtimeEntity showtime, IEnumerable<SeatEntity> selectedSeats, CancellationToken cancel)
         {

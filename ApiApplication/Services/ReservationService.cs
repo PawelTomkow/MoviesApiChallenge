@@ -80,7 +80,8 @@ namespace ApiApplication.Services
         
         private async Task<Showtime> ValidateAndReturnShowtimeAsync(int auditoriumId, int showtimeId, List<Seat> seats, CancellationToken cancellationToken)
         {
-            var orderedSeats = seats.OrderBy(x => x.Row).ThenBy(x => x.SeatNumber).ToArray();
+            var uniqueSeats = seats.Distinct(new SeatEqualityComparer());
+            var orderedSeats = uniqueSeats.OrderBy(x => x.Row).ThenBy(x => x.SeatNumber).ToArray();
             if (orderedSeats.Length > 1)
             {
                 for (var i=0; i<orderedSeats.Length -1; i++)
