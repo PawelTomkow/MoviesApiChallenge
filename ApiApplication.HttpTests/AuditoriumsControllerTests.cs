@@ -29,6 +29,7 @@ namespace ApiApplication.HttpTests
         [TearDown]
         public void TearDown()
         {
+            _testDataDbSeeder.Clear();
             _client.Dispose();
             _server.Dispose();
         }

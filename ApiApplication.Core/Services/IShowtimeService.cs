@@ -12,5 +12,7 @@ namespace ApiApplication.Core.Services
         Task<Showtime> GetByIdAsync(int id, CancellationToken cancellationToken);
         Task<int> CreateAsync(int auditoriumId, string imdbMovieId, DateTime sessionDate,
             CancellationToken cancellationToken);
+
+        Task<SoldSeats> GetByIdWithAuditoriumIdAsync(int showtimeId, CancellationToken cancellationToken);
     }
 }
