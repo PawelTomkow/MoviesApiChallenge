@@ -1,6 +1,7 @@
 services:
   api:
     image: lodgify/movies-api:3
+    container_name: movies-api
     ports:
       - "7172:80"
       - "7443:443"
@@ -10,8 +11,23 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/aspnetapp.pfx
       - FailurePercentage=0
+  challange-api:
+    build: .
+    ports:
+      - "7011:80"
+      - "7012:433"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ApiClient__BaseAddress=https://movies-api:443
+      - ApiClient__ApiKey=Provide_Value
+      - ApiClient__Type=grpc
+      - Cache__ConfigurationString=redis-cache:6379
+      - Cache__Type=redis
+      - Reservation__ExpiryTime=5
   cache:
     image: "redis"
+    container_name: redis-cache
     restart: unless-stopped
     ports:
       - "6379:6379"
