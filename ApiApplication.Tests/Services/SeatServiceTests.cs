@@ -2,12 +2,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 using ApiApplication.Clients.Cache;
+using ApiApplication.Configurations;
 using ApiApplication.Core.Exceptions;
 using ApiApplication.Core.Models;
 using ApiApplication.Core.Services;
 using ApiApplication.Services;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -18,7 +20,6 @@ namespace ApiApplication.Tests.Services
     {
         private IShowtimeService _showtimeService;
         private IAuditoriumService _auditoriumService;
-        private IReservationService _reservationService;
         private ILogger<SeatService> _logger;
         private ICacheRepository _cache;
         private SeatService _sut;
@@ -29,76 +30,21 @@ namespace ApiApplication.Tests.Services
             _showtimeService = Substitute.For<IShowtimeService>();
             _auditoriumService = Substitute.For<IAuditoriumService>();
             _logger = Substitute.For<ILogger<SeatService>>();
-            _reservationService = Substitute.For<IReservationService>();
             _cache = Substitute.For<ICacheRepository>();
-            _sut = new SeatService(_auditoriumService, _showtimeService,_logger, _reservationService, _cache);
-        }
-
-        [Test]
-        public async Task GetWithStatusByShowtimeId_ShouldReturnSeatsWithStatus()
-        {
-            // Arrange
-            const int showtimeId = 123;
-            var cancellationToken = CancellationToken.None;
-
-            var soldSeats = new SoldSeats
+            var reservationConfig = new ReservationConfiguration
             {
-                AuditoriumId = 1,
-                Seats = new List<Seat> { new Seat { Row = 1, SeatNumber = 1 } }
+                ExpiryTime = 5
             };
-            _showtimeService.GetByIdWithAuditoriumIdAsync(showtimeId, cancellationToken).Returns(soldSeats);
-
-            var auditorium = new Auditorium
-            {
-                Seats = new List<Seat> { new Seat { Row = 1, SeatNumber = 1 }, new Seat { Row = 1, SeatNumber = 2 }, new Seat { Row = 1, SeatNumber = 3 } }
-            };
-            _auditoriumService.GetByIdAsync(soldSeats.AuditoriumId, cancellationToken).Returns(auditorium);
-
-            var reservedSeats = new List<Seat> { new Seat { Row = 1, SeatNumber = 2 } };
-            _reservationService.GetReservedSeatsByShowtimeId(showtimeId, cancellationToken).Returns(reservedSeats);
-
-            // Act
-            var result = await _sut.GetWithStatusByShowtimeIdAsync(showtimeId, cancellationToken);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.Should().HaveCount(3);
-            result[0].Seat.Should().BeEquivalentTo(new Seat { Row = 1, SeatNumber = 1 });
-            result[1].Status.Should().Be(SeatStatus.Reserved);
+            var options = Substitute.For<IOptions<ReservationConfiguration>>();
+            options.Value.Returns(reservationConfig);
+            _sut = new SeatService(_auditoriumService, 
+                _showtimeService,
+                _logger,
+                _cache, 
+                options, 
+                new DateTimeProvider());
         }
         
-        [Test]
-        public async Task GetWithStatusByShowtimeId_ShouldReturnSeatsWithAllFreeStatus_WhenNoSoldOrReservedSeats()
-        {
-            // Arrange
-            const int showtimeId = 123;
-            var cancellationToken = CancellationToken.None;
-
-            var soldSeats = new SoldSeats
-            {
-                AuditoriumId = 1,
-                Seats = new List<Seat>()
-            };
-            _showtimeService.GetByIdWithAuditoriumIdAsync(showtimeId, cancellationToken).Returns(soldSeats);
-
-            var auditorium = new Auditorium
-            {
-                Seats = new List<Seat> { new Seat { Row = 1, SeatNumber = 1 }, new Seat { Row = 1, SeatNumber = 2 } }
-            };
-            _auditoriumService.GetByIdAsync(soldSeats.AuditoriumId, cancellationToken).Returns(auditorium);
-
-            var reservedSeats = new List<Seat>();
-            _reservationService.GetReservedSeatsByShowtimeId(showtimeId, cancellationToken).Returns(reservedSeats);
-
-            // Act
-            var result = await _sut.GetWithStatusByShowtimeIdAsync(showtimeId, cancellationToken);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.Should().HaveCount(2);
-            result.Should().OnlyContain(seat => seat.Status == SeatStatus.Free);
-        }
-
         [Test]
         public void GetWithStatusByShowtimeId_ShouldThrowException_WhenSoldSeatsNotFound()
         {
@@ -125,13 +71,18 @@ namespace ApiApplication.Tests.Services
             const short row = 1;
             var cancellationToken = CancellationToken.None;
 
-            _cache.GetValueAsync<SeatStatus>(Arg.Any<string>()).Returns(SeatStatus.Reserved);
+            _cache.GetValueAsync<SeatStatusWithExpirationTime>(Arg.Any<string>()).Returns(new SeatStatusWithExpirationTime()
+            {
+                Status = SeatStatus.Sold,
+                CanExpired = false
+            });
 
             // Act
             var result = await _sut.GetStatusAsync(showtimeId, seatNumber, row, cancellationToken);
 
             // Assert
-            result.Should().Be(SeatStatus.Reserved);
+            result.Should().NotBeNull();
+            result.Status.Should().Be(SeatStatus.Sold);
         }
         
         [Test]

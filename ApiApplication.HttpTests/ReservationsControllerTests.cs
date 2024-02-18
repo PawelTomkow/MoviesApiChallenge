@@ -16,16 +16,19 @@ namespace ApiApplication.HttpTests
     {
         private TestServer _server;
         private HttpClient _client;
+        private TestDataDbSeeder _testDataDbSeeder;
 
         [SetUp]
         public void Setup()
         {
             (_server, _client) = CreateTestServerSetup();
+            _testDataDbSeeder = BuildTestDataDbSeeder(_server);
         }
         
         [TearDown]
         public void TearDown()
         {
+            _testDataDbSeeder.Clear();
             _client.Dispose();
             _server.Dispose();
         }
@@ -34,10 +37,12 @@ namespace ApiApplication.HttpTests
         public async Task CreateReservationAsync_ShouldReturn201AndReservationId_WhenCreateReservationRequestIsCorrect()
         {
             //Arrange
+            _testDataDbSeeder.AddNewShowtimeToDatabase();
             var request = new CreateReservationRequest
             {
-                ShowtimeId = "1",
-                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
+                ShowtimeId = 1,
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}},
+                AuditoriumId = 1
             };
             var requestBody = SerializeToStringContent(request);
             
@@ -52,12 +57,12 @@ namespace ApiApplication.HttpTests
             resultId.Should().NotBeNull();
         }
 
-        [TestCase("1", null,1)]
-        [TestCase("", null,-1)]
-        [TestCase(null, null,-1)]
-        [TestCase(null, null,1)]
-        [TestCase("1",null,-1)]
-        public async Task CreateReservationAsync_ShouldReturn400_WhenCreateReservationRequestIsInvalid(string idShowtime, List<Seat> seats, int auditoriumId)
+        [TestCase(1, null,1)]
+        [TestCase(-1, null,-1)]
+        [TestCase(0, null,-1)]
+        [TestCase(1, null,1)]
+        [TestCase(-1,null,-1)]
+        public async Task CreateReservationAsync_ShouldReturn400_WhenCreateReservationRequestIsInvalid(int idShowtime, List<Seat> seats, int auditoriumId)
         {
             //Arrange
             var request = new CreateReservationRequest
@@ -87,7 +92,7 @@ namespace ApiApplication.HttpTests
             //Arrange
             var request = new CreateReservationRequest
             {
-                ShowtimeId = "",
+                ShowtimeId = -1,
                 Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
             };
             var requestBody = SerializeToStringContent(request);
@@ -109,9 +114,10 @@ namespace ApiApplication.HttpTests
         public async Task CreateReservationAsync_ShouldReturn409_WhenReservationSameSeat()
         {
             //Arrange
+            _testDataDbSeeder.AddNewShowtimeToDatabase();
             var requestBody = new CreateReservationRequest
             {
-                ShowtimeId = "1",
+                ShowtimeId = 1,
                 AuditoriumId = 1,
                 Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
             };
@@ -127,7 +133,7 @@ namespace ApiApplication.HttpTests
             
             var responseErrorMessage = await DeserializeHttpContentAsync<ErrorResponse>(response);
             responseErrorMessage.Should().NotBeNull();
-            responseErrorMessage.Message.Should().Be("This place cannot be booked because it has been booked by someone else.");
+            responseErrorMessage.Message.Should().Be("This place cannot be booked because it has been booked or buy by someone else.");
             responseErrorMessage.StatusCode.Should().Be((int)response.StatusCode);
         }
         
@@ -135,10 +141,12 @@ namespace ApiApplication.HttpTests
         public async Task GetReservationByIdAsync_ShouldReturn200_WhenExitingReservationIdExist()
         {
             //Arrange
+            _testDataDbSeeder.AddNewShowtimeToDatabase();
             var requestBody = new CreateReservationRequest
             {
-                ShowtimeId = "1",
-                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}}
+                ShowtimeId = 1,
+                Seats = new List<Seat> {new Seat{SeatNumber = 1, Row = 1}},
+                AuditoriumId = 1
             };
 
             var responseAsObject = await CreateReservationAsync(requestBody);
