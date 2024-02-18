@@ -45,6 +45,16 @@ namespace ApiApplication.Middlewares
                     statusCode = StatusCodes.Status404NotFound;
                     message = $"{resourceNotFoundException.DomainType.Name} with {resourceNotFoundException.PropertyName}: {resourceNotFoundException.PropertyValue} not found.";
                     break;
+                case ReservationException reservationException:
+                    _logger.LogInformation("{message} Exception: {exception}", reservationException.Message, reservationException);
+                    statusCode = StatusCodes.Status409Conflict;
+                    message = reservationException.Message;
+                    break;
+                case ReservationSeatException reservationSeatException:
+                    _logger.LogInformation("{message} Exception: {exception}", reservationSeatException.Message, reservationSeatException);
+                    statusCode = StatusCodes.Status400BadRequest;
+                    message = reservationSeatException.Message;
+                    break;
                 default:
                     _logger.LogError("Unhandled exception. Please look into logs and investigate. Exception: {exception} HttpContext: {HttpContext}", exception, context);
                     break;

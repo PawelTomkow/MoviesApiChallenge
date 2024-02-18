@@ -1,2 +1,53 @@
 Please add the cURLs of your tests here:
 
+//Movies
+
+curl -X 'GET' \
+  'https://localhost:7629/api/movies/all' \
+  -H 'accept: */*'
+
+//Showtimes
+
+curl -X 'GET' \
+  'https://localhost:7629/api/showtimes/all' \
+  -H 'accept: */*'
+
+curl -X 'GET' \
+  'https://localhost:7629/api/showtimes/1' \
+  -H 'accept: */*'
+  
+ curl -X 'POST' \
+   'https://localhost:7629/api/showtimes/create' \
+   -H 'accept: */*' \
+   -H 'Content-Type: application/json' \
+   -d '{
+   "imdbMovieId": "tt0111161",
+   "sessionDate": "2024-02-18T17:59:07.933Z",
+   "auditoriumId": 1
+ }'
+
+// Reservations
+
+curl -X 'POST' \
+  'https://localhost:7629/api/reservations/create' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "showtimeId": 1,
+  "seats": [
+    {
+      "row": 1,
+      "seatNumber": 3
+    },
+{
+      "row": 1,
+      "seatNumber": 4
+    }
+  ],
+  "auditoriumId": 1
+}'
+
+curl -X 'GET' \
+  'https://localhost:7629/api/reservations/589bf430-ba1c-43eb-bbc0-8a05f866f229' \
+  -H 'accept: */*'
+
